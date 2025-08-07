@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Document - PolicyBaba</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /*
+         * Base Styles & Layout
+         * --------------------------------------------------
+         */
+        :root {
+            --color-primary: #10a37f;
+            --color-secondary: #1a73e8;
+            --color-background-dark: #0d1117;
+            --color-card-background: #161b22;
+            --color-border: #30363d;
+            --color-text-light: #e6edf3;
+            --color-text-muted: #8b949e;
+            --font-family-main: 'Inter', sans-serif;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-main);
+            background: var(--color-background-dark);
+            color: var(--color-text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background loader */
+        .background-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(16, 163, 127, 0.02) 0%, rgba(26, 115, 232, 0.02) 100%);
+            z-index: -1;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /*
+         * Navbar Styles
+         * --------------------------------------------------
+         */
+        .navbar {
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(48, 54, 61, 0.2);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #10a37f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #e6edf3;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            color: #10a37f;
+            background: rgba(16, 163, 127, 0.1);
+            border-color: rgba(16, 163, 127, 0.2);
+        }
+
+        .nav-links a.active {
+            color: #10a37f;
+            background: rgba(16, 163, 127, 0.1);
+            border-color: rgba(16, 163, 127, 0.3);
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .auth-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .login-btn {
+            color: #e6edf3;
+            border: 1px solid rgba(48, 54, 61, 0.5);
+        }
+
+        .login-btn:hover {
+            background: rgba(13, 17, 23, 0.8);
+            border-color: rgba(16, 163, 127, 0.5);
+            color: #10a37f;
+        }
+
+        .signup-btn {
+            background: linear-gradient(135deg, #10a37f 0%, #0d8a6b 100%);
+            color: white;
+            border: 1px solid transparent;
+        }
+
+        .signup-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 163, 127, 0.3);
+        }
+
+        .user-profile {
+            position: relative;
+            display: none;
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10a37f 0%, #0d8a6b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            border-color: rgba(16, 163, 127, 0.5);
+            box-shadow: 0 0 20px rgba(16, 163, 127, 0.3);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: rgba(33, 38, 45, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(48, 54, 61, 0.3);
+            border-radius: 12px;
+            padding: 0.5rem 0;
+            min-width: 200px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .profile-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #e6edf3;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(16, 163, 127, 0.1);
+            color: #10a37f;
+        }
+
+        .dropdown-item i {
+            width: 16px;
+            font-size: 0.9rem;
+        }
+
+        /*
+         * Main Content Styles
+         * --------------------------------------------------
+         */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 3rem;
+            background: var(--color-card-background);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container h2 {
+            margin-bottom: 2rem;
+            color: var(--color-text-light);
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .upload-form input[type="file"] {
+            display: none;
+        }
+
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            border: 2px dashed rgba(16, 163, 127, 0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            background: rgba(16, 163, 127, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: var(--color-primary);
+            background: rgba(16, 163, 127, 0.1);
+        }
+
+        .upload-area .fa-cloud-upload-alt {
+            font-size: 3rem;
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-area:hover .fa-cloud-upload-alt {
+            transform: translateY(-5px);
+        }
+
+        .upload-area p {
+            color: var(--color-text-light);
+            font-weight: 500;
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #10a37f 0%, #0d8a6b 100%);
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 250px;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 15px rgba(16, 163, 127, 0.2);
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 163, 127, 0.3);
+        }
+
+        #file-name {
+            margin-top: 1rem;
+            color: var(--color-text-muted);
+            font-style: italic;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(26, 115, 232, 0.3);
+        }
+
+        /*
+         * Footer Styles - Properly Aligned
+         * --------------------------------------------------
+         */
+        .footer {
+            background: linear-gradient(135deg, #0a0e13 0%, #161b22 100%);
+            color: #e6edf3;
+            padding: 3rem 0 2rem 0;
+            margin-top: auto;
+            border-top: 1px solid rgba(48, 54, 61, 0.3);
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .footer-brand {
+            max-width: 350px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo i {
+            font-size: 2.2rem;
+            color: #10a37f;
+        }
+
+        .footer-logo strong {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e6edf3;
+        }
+
+        .footer-brand p {
+            color: #8b949e;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(48, 54, 61, 0.3);
+            border: 1px solid rgba(48, 54, 61, 0.5);
+            border-radius: 8px;
+            color: #8b949e;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .social-icons a:hover {
+            background: rgba(16, 163, 127, 0.1);
+            border-color: rgba(16, 163, 127, 0.3);
+            color: #10a37f;
+            transform: translateY(-2px);
+        }
+
+        .footer-section h3 {
+            color: #10a37f;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: linear-gradient(90deg, #10a37f, transparent);
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section ul li a {
+            color: #8b949e;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-section ul li a:hover {
+            color: #10a37f;
+            padding-left: 0.5rem;
+        }
+
+        .footer-section ul li a i {
+            font-size: 0.85rem;
+            width: 16px;
+        }
+
+        /* Contact section specific styles */
+        .contact-info {
+            color: #8b949e;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .contact-info p {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .contact-info i {
+            color: #10a37f;
+            margin-top: 0.2rem;
+            font-size: 1rem;
+            width: 16px;
+        }
+
+        .support-hours {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(16, 163, 127, 0.05);
+            border: 1px solid rgba(16, 163, 127, 0.1);
+            border-radius: 8px;
+        }
+
+        .support-hours h4 {
+            color: #10a37f;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .support-hours p {
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        /*
+         * Footer Bottom
+         * --------------------------------------------------
+         */
+        .footer-bottom {
+            background: #0a0e13;
+            border-top: 1px solid rgba(48, 54, 61, 0.3);
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+        }
+
+        .footer-bottom-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-bottom p {
+            color: #8b949e;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-bottom-links a {
+            color: #8b949e;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom-links a:hover {
+            color: #10a37f;
+        }
+
+        /*
+         * Responsive Design
+         * --------------------------------------------------
+         */
+        @media (max-width: 992px) {
+            .navbar-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .nav-center, .profile-section {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .nav-links {
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
+
+            .footer-brand {
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .footer-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            .footer-section h3::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .footer-bottom-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .footer-bottom-links {
+                justify-content: center;
+            }
+
+            .contact-info p {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+            }
+
+            .footer {
+                padding: 2rem 0 1rem 0;
+            }
+
+            .footer-container {
+                padding: 0 1rem;
+            }
+
+            .footer-bottom-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-loader"></div>
+    
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <i class="fas fa-brain"></i> PolicyBaba
+            </div>
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="uplod_doc.html" class="active"><i class="fas fa-upload"></i> Upload</a></li>
+                    <li><a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+                    <li><a href="chat_hist.html"><i class="fas fa-comments"></i> Chat History</a></li>
+                </ul>
+            </div>
+            
+            <div class="profile-section">
+                <div class="auth-buttons" id="authButtons">
+                    <a href="#" class="auth-btn login-btn" onclick="showLogin()">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="#" class="auth-btn signup-btn" onclick="showSignup()">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </a>
+                </div>
+                
+                <div class="user-profile" id="userProfile">
+                    <div class="profile-avatar" onclick="toggleProfileDropdown()">
+                        <span id="userInitials">JD</span>
+                    </div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-file-alt"></i> My Documents
+                        </a>
+                        <hr style="border: none; border-top: 1px solid rgba(48, 54, 61, 0.3); margin: 0.5rem 0;">
+                        <a href="#" class="dropdown-item" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <div class="container">
+            <h2>Upload a Document</h2>
+            <form class="upload-form">
+                <label for="file-upload" class="upload-area">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag & drop your PDF file here, or click to select</p>
+                </label>
+                <input type="file" id="file-upload" accept=".pdf">
+                <span id="file-name">No file selected</span>
+                <button type="submit" class="btn-submit">Upload Document</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <i class="fas fa-brain"></i>
+                    <strong>PolicyBaba</strong>
+                </div>
+                <p>Your trusted partner for AI-powered document intelligence. Experience excellence in policy analysis and document insights with advanced machine learning technology.</p>
+                <div class="social-icons">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="uplod_doc.html"><i class="fas fa-upload"></i> Upload Documents</a></li>
+                    <li><a href="analytics.html"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+                    <li><a href="chat_hist.html"><i class="fas fa-comments"></i> Chat History</a></li>
+                    <li><a href="#"><i class="fas fa-question-circle"></i> Help Center</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Our Services</h3>
+                <ul>
+                    <li><a href="#"><i class="fas fa-file-alt"></i> Document Analysis</a></li>
+                    <li><a href="#"><i class="fas fa-balance-scale"></i> Policy Comparison</a></li>
+                    <li><a href="#"><i class="fas fa-brain"></i> AI Insights</a></li>
+                    <li><a href="#"><i class="fas fa-chart-line"></i> Custom Reports</a></li>
+                    <li><a href="#"><i class="fas fa-download"></i> Data Export</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <div class="contact-info">
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Intelligence Drive<br>Tech District<br>Innovation City, AI 30303</p>
+                    <p><i class="fas fa-phone"></i> (800) 555-0199</p>
+                    <p><i class="fas fa-envelope"></i> support@policybaba.com</p>
+                </div>
+                <div class="support-hours">
+                    <h4>Support Hours</h4>
+                    <p>Mon - Fri: 9:00 AM - 6:00 PM</p>
+                    <p>Saturday: 10:00 AM - 4:00 PM</p>
+                    <p>Sunday: Closed</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <p>&copy; 2024 PolicyBaba. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">API Documentation</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        const fileInput = document.getElementById('file-upload');
+        const fileNameSpan = document.getElementById('file-name');
+        const uploadArea = document.querySelector('.upload-area');
+        
+        // Add visual feedback for drag-and-drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#10a37f';
+            uploadArea.style.boxShadow = '0 0 10px rgba(16, 163, 127, 0.5)';
+        });
+        
+        uploadArea.addEventListener('dragleave', (e) => {
+            uploadArea.style.borderColor = '';
+            uploadArea.style.boxShadow = 'none';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '';
+            uploadArea.style.boxShadow = 'none';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileNameSpan.textContent = files[0].name;
+            }
+        });
+
+        fileInput.addEventListener('change', function () {
+            const file = fileInput.files[0];
+            if (file) {
+                fileNameSpan.textContent = file.name;
+            } else {
+                fileNameSpan.textContent = 'No file selected';
+            }
+        });
+
+        // Simple script for user login/logout state
+        function setAuthState(isLoggedIn) {
+            const authButtons = document.getElementById('authButtons');
+            const userProfile = document.getElementById('userProfile');
+
+            if (isLoggedIn) {
+                authButtons.style.display = 'none';
+                userProfile.style.display = 'block';
+            } else {
+                authButtons.style.display = 'flex';
+                userProfile.style.display = 'none';
+            }
+        }
+        
+        // Example usage: setAuthState(false) on page load
+        document.addEventListener('DOMContentLoaded', () => {
+             setAuthState(false); // Change to true if a user is logged in
+        });
+
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.profile-avatar') && !event.target.matches('.profile-avatar *')) {
+                const dropdowns = document.getElementsByClassName('profile-dropdown');
+                for (let i = 0; i < dropdowns.length; i++) {
+                    const openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
